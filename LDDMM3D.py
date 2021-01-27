@@ -201,9 +201,9 @@ def LDDMM(I0, I1, T = 32, maxiter = 200, lr = 1e-3, sigma = 1.0, alpha = 1.0, ga
 
 if __name__ == "__main__":
     # load greyscale images
-    mrc = mrcfile.open('/emd_21546.map', permissive=True, mode='r')
+    mrc = mrcfile.open('./emd_21546.map', permissive=True, mode='r')
     i0=mrc.data
-    mrc = mrcfile.open('/emd_21546_ffit_into_emd_21547.mrc', permissive=True, mode='r')
+    mrc = mrcfile.open('./emd_21546_ffit_into_emd_21547.mrc', permissive=True, mode='r')
     i1=mrc.data
     i0=downscale_local_mean(i0,(2,2,2))
     i0 = downscale_local_mean(i0, (2, 2, 2))
