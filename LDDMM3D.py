@@ -210,4 +210,4 @@ if __name__ == "__main__":
     i1=downscale_local_mean(i1,(2,2,2))
     i1 = downscale_local_mean(i1, (2, 2, 2))
     n=i0.shape[0]
-    v, Phi0, Phi1, J0, J1=LDDMM(i0, i1, T = 10, maxiter = 100, sigma = 0.1, alpha = 1, gamma = 1, lr = 0.5)
+    v, Phi0, Phi1, J0, J1=LDDMM(i0, i1, T = 10, maxiter = 100, sigma = 0.1, alpha = 1, gamma = 1, lr = 0.01)
