@@ -53,7 +53,7 @@ def LDDMM(I0, I1, T = 32, maxiter = 200, lr = 1e-3, sigma = 1.0, alpha = 1.0, ga
         '''
         a = 1 - np.cos(np.linspace(0, 2 * pi, nx, endpoint = False))
         b = 1 - np.cos(np.linspace(0, 2 * pi, ny, endpoint = False))
-        c = 1 - np.cos(np.linspace(0, 2 * pi, ny, endpoint = False))
+        c = 1 - np.cos(np.linspace(0, 2 * pi, nz, endpoint = False))
         A = 2*alpha * (a.reshape((nx, 1,1)) + b.reshape((1, ny,1))+c.reshape((1,1,nz))) + gamma
         G = fftn(g)
         F = G / (A ** 2)
@@ -106,7 +106,7 @@ def LDDMM(I0, I1, T = 32, maxiter = 200, lr = 1e-3, sigma = 1.0, alpha = 1.0, ga
         for t in range(T - 2, -1, -1):
             alpha = np.zeros((3, nx, ny,nz), dtype = np.float64)
             for _ in range(5):
-                alpha = _deform(v[t], Phi1[T - 1] + 0.5 * alpha)
+                alpha = _deform(v[t+1], Phi1[T - 1] + 0.5 * alpha)
             Phi1[t] = _deform(Phi1[t + 1], Phi1[T - 1] + alpha)
 
         return Phi1
