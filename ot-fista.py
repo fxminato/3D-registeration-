@@ -35,7 +35,7 @@ class staggered():
         self.M2=np.zeros([P,Q+1,T])
         self.F=np.zeros([P,Q,T+1])
         self.F[:,:,0]=i0
-        self.F[:,:,1]=i1
+        self.F[:,:,-1]=i1
 def interp(U):
     #V is the center grid(3*P*Q*T),the 0th and 1th dimension represents momentum,the 2th dimension represents density
     V=np.zeros([3,P,Q,T])
@@ -72,16 +72,30 @@ def poisson_Neumann(f):
     return res
 def PG(x,niter):
     tao=1
-    lr=0.0005
-    epsilon = 1e-4
+    lr=0.00005
+    epsilon = 1e-8
     for i in range(niter):
         xold=x
         y=interp(xold)
         y[2,y[2,:,:,:]<epsilon]=epsilon
+        #M1=np.zeros([P,Q,T])
+        #M2=np.zeros([P,Q,T])
+        #F=np.zeros([P,Q,T])
+        #H=np.zeros([P,Q,T])
+        #M1[y[2,:,:,:]!=0]=y[0,y[2,:,:,:]!=0]/y[2,y[2,:,:,:]!=0]
+        #M2[y[2,:,:,:]!=0]=y[1,y[2,:,:,:]!=0]/y[2,y[2,:,:,:]!=0]
+        #F[y[2,:,:,:]!=0]=(y[0,y[2,:,:,:]!=0]**2+y[1,y[2,:,:,:]!=0]**2)/(2*(y[2,y[2,:,:,:]!=0]**2))
+        #H = (y[0, y[2,:,:,:]!=0] ** 2 + y[1, y[2,:,:,:]!=0] ** 2) / abs(y[2, y[2,:,:,:]!=0])
+        
         M1=y[0,:,:,:]/y[2,:,:,:]
         M2=y[1,:,:,:]/y[2,:,:,:]
-        F=(y[0,:,:,:]**2+y[1,:,:,:]**2)/(y[2,:,:,:]**2)
+        F=(y[0,:,:,:]**2+y[1,:,:,:]**2)/(2*(y[2,:,:,:]**2))
         H=(y[0,:,:,:]**2+y[1,:,:,:]**2)/abs(y[2,:,:,:])
+        M1[y[2,:,:,:]==epsilon]=0
+        M2[y[2,:,:,:]==epsilon]=0
+        F[y[2,:,:,:]==epsilon]=0
+        H[y[2,:,:,:]==epsilon]=0
+        
         x.M1[1:-1,:,:]=xold.M1[1:-1,:,:]-lr*(M1[1:,:,:]+M1[:-1,:,:])/2
         x.M2[:,1:-1,:]=xold.M2[:,1:-1,:]-lr*(M2[:,1:,:]+M2[:,:-1,:])/2
         x.F[:,:,1:-1]=xold.F[:,:,1:-1]+lr*(F[:,:,1:]+F[:,:,:-1])/2
@@ -90,7 +104,6 @@ def PG(x,niter):
         x.M2[:, 1:-1, :]=x.M2[:, 1:-1, :]+phi[:,1:,:]-phi[:,:-1,:]
         x.F[:, :, 1:-1]=x.F[:, :, 1:-1]+phi[:,:,1:]-phi[:,:,:-1]
         tao0=tao
-        tao=(1+np.sqrt(1+4*tao0*tao0))/2
         w=(tao0-1)/tao
         E=np.linalg.norm(H)
         x.M1[1:-1, :, :] = (1+w)*x.M1[1:-1, :, :]-w*xold.M1[1:-1, :, :]
@@ -108,7 +121,9 @@ F_init=np.zeros([P,Q,T+1])
 for t in range(T+1):
     F_init[:,:,t]=i1*t/T+i0*(T-t)/T
 U0.F=F_init
-U=PG(U0,50)
+U0.M1=np.zeros([P+1,Q,T])
+U0.M2=np.zeros([P,Q+1,T])
+U=PG(U0,32)
 F=np.zeros([T+1,P,Q])
 for t in range(T+1):
     F[t,:,:]=U.F[:,:,t]*a
