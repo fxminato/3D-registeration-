@@ -7,7 +7,6 @@ ker_cubic = module.get_function('cubic')
 
 def cubic(b, c, d):
     x = cp.empty_like(b)
-
     ker_cubic(((x.size- 1) // BLOCKSIZE + 1, ), \
                   (BLOCKSIZE, ), \
                   (b, c, d, x.size, x))

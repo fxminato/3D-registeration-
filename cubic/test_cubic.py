@@ -1,7 +1,7 @@
 import numpy as np
 import cupy as cp
 from kernel_cubic import cubic
-
+import time
 def poly_root(b,c,d):
     '''
      the largest real root of cubic equation with coefficient(1, b, c, d)
@@ -10,6 +10,10 @@ def poly_root(b,c,d):
      Input: b,c,d (numpy array of size[P,Q,R,T])
      Output: x (numpy array of size[P,Q,R,T])
     '''
+    P = b.shape[0]
+    Q = b.shape[1]
+    R = b.shape[2]
+    T = b.shape[3]
     u = (9 * b * c - 27 * d - 2 * b ** 3)/54
     u = u.astype('complex')
     delta = 3 * (4 * c ** 3 - b ** 2 * c ** 2 - 18 * b * c * d + 27 * d ** 2 + 4 * b ** 3 * d)
@@ -30,10 +34,15 @@ def poly_root(b,c,d):
     realMask = abs(root.imag) < 1e-8
     root[~realMask] = 0
     return cp.amax(root.real, axis = 0)
-
-b = cp.random.randn(64)
-c = cp.random.randn(64)
-d = cp.random.randn(64)
-#a1 = poly_root(b,c,d)
+b = cp.random.randn(10,10,10,10)
+c = cp.random.randn(10,10,10,10)
+d = cp.random.randn(10,10,10,10)
+s = time.time()
+a1 = poly_root(b, c, d)
+t = time.time()
+print(f'cupy {t-s:4.8f}')
+s = time.time()
 a2 = cubic(b, c, d)
-print(cp.allclose(a2, (9 * b * c - 27 * d - 2 * b * b * b) / 54))
+t = time.time()
+print(f'kernel {t-s:4.8f}')
+print(cp.linalg.norm(a2 - a1))
