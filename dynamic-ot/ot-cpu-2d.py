@@ -7,9 +7,10 @@ import matplotlib.pyplot as plt
 from scipy.fft import dctn,idctn
 import imageio
 from PIL import Image
+from skimage.io import imread, imsave
 P=64
 Q=64
-T=32
+T=10
 d=[P,Q,T]
 epsilon=1e-8
 def loadimg(path):
@@ -30,21 +31,20 @@ def save_animation(path, images):
     images = [Image.fromarray((images[t] * 255).astype('uint8')) for t in range(len(images))]
     imageio.mimsave(path, images)
 class staggered():
+    """
+    Vector field on staggered grid
+    """
     def __init__(self,dimvect):
-        self.M1=np.zeros([P+1,Q,T])
-        self.M2=np.zeros([P,Q+1,T])
-        self.F=np.zeros([P,Q,T+1])
+        self.M1 = np.zeros([P+1, Q, T])
+        self.M2 = np.zeros([P, Q+1, T])
+        self.F  = np.zeros([P, Q, T+1])
+        self.F[:, :, 0] = i0
+        self.F[:,:,-1]=i1
 def interp(U):
     V=np.zeros([3,P,Q,T])
     M1=U.M1.copy()
     M2=U.M2.copy()
     F=U.F.copy()
-    M1[0, :, :] = 0
-    M1[-1, :, :] = 0
-    M2[:, 0, :]= 0
-    M2[:, -1, :] = 0
-    F[:, :, 0] = 0
-    F[:, :, -1] = 0
     V[0,:,:,:]=(M1[:-1,:,:]+M1[1:,:,:])/2
     V[1,:,:,:]=(M2[:,:-1,:]+M2[:,1:,:])/2
     V[2,:,:,:]=(F[:,:,1:]+F[:,:,:-1])/2
@@ -67,36 +67,22 @@ def ProxJ(V0, gamma, epsilon):
     f0 = V0[2, :, :, :]
     m1 = V0[0, :, :, :]
     m2 = V0[1, :, :, :]
-    root1,root2,root3=poly_root(4*gamma-f0,4*gamma*gamma-4*gamma*f0,-4*gamma*gamma*f0-gamma*(m1**2+m2**2))
-    root1[np.isreal(root1)==0]=np.real(np.float('-inf'))
-    root2[np.isreal(root2)==0] = np.real(np.float('-inf'))
-    root3[np.isreal(root3) == 0] = np.real(np.float('-inf'))
-    root1=root1.astype('float64')
-    root2=root2.astype('float64')
-    root3=root3.astype('float64')
-    a[2,:,:,:]=np.maximum(root1,root2)
-    a[2,:,:,:]=np.maximum(a[2,:,:,:],root3)
-    a[2,a[2,:,:,:]<epsilon]=epsilon
+    gamma=gamma/2
+    a[2,:,:,:]=poly_root(4*gamma-f0,4*gamma*gamma-4*gamma*f0,-4*gamma*gamma*f0-gamma*(m1**2+m2**2))
     a[0,:,:,:]=a[2,:,:,:]*m1/(a[2,:,:,:]+2*gamma)
     a[1,:,:,:]=a[2,:,:,:]*m2/(a[2,:,:,:]+2*gamma)
     return a
-def ProxF(V0,gamma):
-    b=np.zeros([3,P,Q,T])
-    b[2,:,:,0]=i0/2
-    b[2,:,:,-1]=i1/2
-    return ProxJ(V0+b,gamma,epsilon)-b
 def ProxFS(y,sigma):
-    return y-sigma*ProxF(y/sigma,1/sigma)
+    return y-sigma*ProxJ(y/sigma,1/sigma,epsilon)
 def div(u):
     v=np.zeros([P,Q,T])
     v=P*(u.M1[1:,:,:]-u.M1[:-1,:,:])+Q*(u.M2[:,1:,:]-u.M2[:,:-1,:])+T*(u.F[:,:,1:]-u.F[:,:,:-1])
     return v
 def poisson_Neumann(f):
-    denom2=np.zeros([P,Q,T])
-    for i in range(P):
-        for j in range(Q):
-            for k in range(T):
-                denom2[i,j,k]=(2*np.cos(np.pi*i/P)-2)*P**2+(2*np.cos(np.pi*j/Q)-2)*Q**2+(2*np.cos(np.pi*k/T)-2)*T**2
+    x =(2 * np.cos(np.pi * np.arange(0, P) / P) - 2) * P ** 2
+    y =(2 * np.cos(np.pi * np.arange(0, Q) / Q) - 2) * Q ** 2
+    z =(2 * np.cos(np.pi * np.arange(0, T) / T) - 2) * T ** 2
+    denom2 = x.reshape(P, 1, 1) + y.reshape(1, Q, 1) + z.reshape(1, 1, T)
     denom2[denom2 == 0] = 1
     fhat=dctn(f,norm='ortho')
     uhat=-(fhat)/denom2
@@ -113,7 +99,7 @@ def ProxG(u):
     v.F[:,:,1:-1]=v.F[:,:,1:-1]-(p[:,:,1:]-p[:,:,:-1])*T
     return v
 def perform_primal_dual(x,niter,theta=1):
-    sigma=85
+    sigma=100
     tau=0.99/sigma
     x1=staggered(dimvect=d)
     x1.M1=x.M1.copy()
@@ -121,13 +107,14 @@ def perform_primal_dual(x,niter,theta=1):
     x1.F=x.F.copy()
     y=interp(x)
     for i in range(niter):
-
         xold=staggered(dimvect=d)
         xold.M1=x.M1.copy()
         xold.M2=x.M2.copy()
         xold.F=x.F.copy()
         y0=interp(x1)
+        print(np.linalg.norm(y0))
         y=ProxFS(y+sigma*y0,sigma)
+        print(np.linalg.norm(y))
         z=interp_ad(y)
         z.M1=x.M1-tau*z.M1
         z.M2=x.M2-tau*z.M2
@@ -136,10 +123,11 @@ def perform_primal_dual(x,niter,theta=1):
         x1.M1=x.M1+theta*(x.M1-xold.M1)
         x1.M2=x.M2+theta*(x.M2-xold.M2)
         x1.F=x.F+theta*(x.F-xold.F)
-        E=np.sum((y0[1,:,:,:]**2+y0[0,:,:,:]**2)/np.maximum(y0[2,:,:,:]**2,1e-8)/2)
+        aa=interp(x)
+        E=np.sum((aa[1,:,:,:]**2+aa[0,:,:,:]**2)/np.maximum(aa[2,:,:,:]**2,1e-8))
         print(f'iteration {i:3d}, energy {E:4.8f} ')
     return (x,y)
-
+np.lin
 def poly_root(b,c,d):
     u=(9*b*c-27*d-2*b**3)/54
     u=u.astype('complex')
@@ -154,34 +142,74 @@ def poly_root(b,c,d):
     n=np.zeros_like(u,dtype='complex')
     n[m!=0]=(b[m!=0]**2-3*c[m!=0])/(9*m[m!=0])
     w=-0.5+0.5j*np.sqrt(3)
-    x1=m+n-b/3
-    x2=w*m+w*w*n-b/3
-    x3=w*w*m+w*n-b/3
-    x1[abs(np.imag(x1))<1e-8]=np.real(x1[abs(np.imag(x1))<1e-8])
-    x2[abs(np.imag(x2))<1e-8]=np.real(x2[abs(np.imag(x2))<1e-8])
-    x3[abs(np.imag(x3))<1e-8]=np.real(x3[abs(np.imag(x3))<1e-8])
-    return(x1,x2,x3)
-
-i0=np.array(loadimg('/Users/minato/workspace/Compressed_Sensing/pythonProject/pyLDDMM/example_images/t0.png'))
-i1=np.array(loadimg('/Users/minato/workspace/Compressed_Sensing/pythonProject/pyLDDMM/example_images/t1.png'))
+    root=np.zeros([3,P,Q,T],dtype='complex')
+    root[0]=m+n-b/3
+    root[1]=w*m+w*w*n-b/3
+    root[2]=w*w*m+w*n-b/3
+    realMask = np.abs(root.imag) < 1e-8
+    root[~realMask]=0
+    return np.amax(root.real, axis = 0)
+i0=imread('/Users/minato/Desktop/data/ot/t1-0.png',as_gray=True)
+i1=imread('/Users/minato/Desktop/data/ot/t1-1.png',as_gray=True)
+'''
+i0=np.zeros([256,256])
+i1=np.zeros([256,256])
+for i in range(64):
+    for j in range(64):
+        for x in range(4):
+            for y in range(4):
+                i0[4*i+x,4*j+y]=si0[i,j]
+                i1[4*i+x,4*j+y]=si1[i,j]
+'''
 a=i0.sum()
+b=i1.sum()
 i0=i0/a
-i1=i1/a
+i1=i1/b
 U0=staggered(dimvect=d)
 F_init=np.zeros([P,Q,T+1])
 for t in range(T+1):
     F_init[:,:,t]=i1*t/T+i0*(T-t)/T
 U0.F=F_init
-U,V=perform_primal_dual(U0,200)
+U,V=perform_primal_dual(U0,500)
 F=np.zeros([T+1,P,Q])
 for t in range(T+1):
-    F[t,:,:]=U.F[:,:,t]
+    F[t, :, :] = U.F[:, :, t]
+    max = np.max(F[t, :, :])
+    min = np.min(F[t, :, :])
+    F[t, :, :] = min + (F[t, :, :] - min) / (max - min)
+'''
+P=64
+Q=64
+F=np.zeros([T+1,P,Q])
+V1=np.zeros([P,Q,T])
+V2=np.zeros([P,Q,T])
+for t in range(T+1):
+    for i in range(P):
+        for j in range(Q):
+            s=0
+            for x in range(4):
+                for y in range(4):
+                    s=s+U.F[4*i+x,4*j+y,t]
+            F[t,i,j]=s/16
     max=np.max(F[t,:,:])
     min=np.min(F[t,:,:])
     F[t,:,:]=min+(F[t,:,:]-min)/(max-min)
 
-np.save('/Users/minato/desktop/aaa', F)
-save_animation('/Users/minato/desktop/out.gif',F)
+P=256
+Q=256
+V=interp(U)
+V11=V[0,:,:,:]/V[2,:,:,:]
+V22=V[1,:,:,:]/V[2,:,:,:]
+for t in range(T):
+    for i in range(64):
+        for j in range(64):
+            V1[i,j,t]=(V11[2*i,2*j,t]+V11[2*i+1,2*j+1,t]+V11[2*i+1,2*j,t]+V11[2*i,2*j+1,t])/4
+            V2[i,j,t]=(V22[2*i,2*j,t]+V22[2*i+1,2*j+1,t]+V22[2*i+1,2*j,t]+V22[2*i,2*j+1,t])/4
+np.save('/Users/minato/desktop/F', F)
+np.save('/Users/minato/desktop/V1',V1)
+np.save('/Users/minato/desktop/V2',V2)
+'''
+save_animation('/Users/minato/desktop/outtest.gif',F)
 
 
 
