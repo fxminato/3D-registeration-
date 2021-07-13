@@ -3,12 +3,15 @@ import cupy as cp
 from kernel_wrap import *
 from Volume import *
 from skimage.transform import warp
-img0 = np.random.randn(100,100,100)
+#img0 = np.random.randn(100,100,100)
 #img0 = np.maximum(img0,0)
-phi0 = np.random.randn(3,100,100,100)
+#phi0 = np.random.randn(3,100,100,100)
 #phi0 = np.maximum(phi0,0)
-#img0 = np.arange(8).reshape([2,2,2])
-#img0 = img0.astype(np.float64)
+img0 = np.random.randn(60,60,60)
+img0 = img0.astype(np.float64)
+phi0 = np.mgrid[:60, :60, :60]
+phi0 = phi0.astype(np.float64)
+
 #phi0 = np.zeros([3,2,2,2],dtype= np.float64)
 #phi0[0,:,:,:] = 1
 #phi0[1,:,:,:] = 2
@@ -23,4 +26,3 @@ result1 = wrap(m0, m1, m2, m3)
 #print(result0)
 #print(result1)
 print(cp.linalg.norm(result0 - result1))
-imaggg =  img.astype(cp.float64, order = 'C')

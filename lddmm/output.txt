@@ -1,106 +1,17 @@
 Traceback (most recent call last):
-  File "lddmm.py", line 207, in <module>
-    v, Phi0, Phi1, J0, J1=LDDMM(i0, i1, T = 8, maxiter = 8, sigma = 0.1, alpha = 1, gamma = 1, lr = 0.001)
-  File "lddmm.py", line 173, in LDDMM
-    detPhi1 = _jacobian_derterminant(Phi1)
-  File "lddmm.py", line 139, in _jacobian_derterminant
-    dx[2] * dy[1] * dz[0]-dx[1] * dy[0]*dz[2]-dx[0]*dy[2]*dz[1])
-  File "cupy/core/core.pyx", line 1007, in cupy.core.core.ndarray.__mul__
-  File "cupy/core/_kernel.pyx", line 1084, in cupy.core._kernel.ufunc.__call__
-  File "cupy/core/_kernel.pyx", line 1107, in cupy.core._kernel.ufunc._get_ufunc_kernel
-  File "cupy/core/_kernel.pyx", line 881, in cupy.core._kernel._get_ufunc_kernel
-  File "cupy/core/_kernel.pyx", line 60, in cupy.core._kernel._get_simple_elementwise_kernel
-  File "cupy/core/core.pyx", line 1862, in cupy.core.core.compile_with_cache
-  File "/usr/local/lib/python3.7/dist-packages/cupy/cuda/compiler.py", line 338, in compile_with_cache
-    cache_in_memory)
-  File "/usr/local/lib/python3.7/dist-packages/cupy/cuda/compiler.py", line 446, in _compile_with_cache_cuda
-    mod.load(cubin)
-  File "cupy/cuda/function.pyx", line 222, in cupy.cuda.function.Module.load
-  File "cupy/cuda/function.pyx", line 224, in cupy.cuda.function.Module.load
-  File "cupy_backends/cuda/api/driver.pyx", line 246, in cupy_backends.cuda.api.driver.moduleLoadData
-  File "cupy_backends/cuda/api/driver.pyx", line 124, in cupy_backends.cuda.api.driver.check_status
-cupy_backends.cuda.api.driver.CUDADriverError: CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
-Traceback (most recent call last):
-  File "cupy_backends/cuda/api/driver.pyx", line 253, in cupy_backends.cuda.api.driver.moduleUnload
-  File "cupy_backends/cuda/api/driver.pyx", line 124, in cupy_backends.cuda.api.driver.check_status
-cupy_backends.cuda.api.driver.CUDADriverError: CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
-Exception ignored in: 'cupy.cuda.function.Module.__dealloc__'
-Traceback (most recent call last):
-  File "cupy_backends/cuda/api/driver.pyx", line 253, in cupy_backends.cuda.api.driver.moduleUnload
-  File "cupy_backends/cuda/api/driver.pyx", line 124, in cupy_backends.cuda.api.driver.check_status
-cupy_backends.cuda.api.driver.CUDADriverError: CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
-Traceback (most recent call last):
-  File "cupy_backends/cuda/api/driver.pyx", line 253, in cupy_backends.cuda.api.driver.moduleUnload
-  File "cupy_backends/cuda/api/driver.pyx", line 124, in cupy_backends.cuda.api.driver.check_status
-cupy_backends.cuda.api.driver.CUDADriverError: CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
-Exception ignored in: 'cupy.cuda.function.Module.__dealloc__'
-Traceback (most recent call last):
-  File "cupy_backends/cuda/api/driver.pyx", line 253, in cupy_backends.cuda.api.driver.moduleUnload
-  File "cupy_backends/cuda/api/driver.pyx", line 124, in cupy_backends.cuda.api.driver.check_status
-cupy_backends.cuda.api.driver.CUDADriverError: CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
-Traceback (most recent call last):
-  File "cupy_backends/cuda/api/driver.pyx", line 253, in cupy_backends.cuda.api.driver.moduleUnload
-  File "cupy_backends/cuda/api/driver.pyx", line 124, in cupy_backends.cuda.api.driver.check_status
-cupy_backends.cuda.api.driver.CUDADriverError: CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
-Exception ignored in: 'cupy.cuda.function.Module.__dealloc__'
-Traceback (most recent call last):
-  File "cupy_backends/cuda/api/driver.pyx", line 253, in cupy_backends.cuda.api.driver.moduleUnload
-  File "cupy_backends/cuda/api/driver.pyx", line 124, in cupy_backends.cuda.api.driver.check_status
-cupy_backends.cuda.api.driver.CUDADriverError: CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
-Traceback (most recent call last):
-  File "cupy_backends/cuda/api/driver.pyx", line 253, in cupy_backends.cuda.api.driver.moduleUnload
-  File "cupy_backends/cuda/api/driver.pyx", line 124, in cupy_backends.cuda.api.driver.check_status
-cupy_backends.cuda.api.driver.CUDADriverError: CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
-Exception ignored in: 'cupy.cuda.function.Module.__dealloc__'
-Traceback (most recent call last):
-  File "cupy_backends/cuda/api/driver.pyx", line 253, in cupy_backends.cuda.api.driver.moduleUnload
-  File "cupy_backends/cuda/api/driver.pyx", line 124, in cupy_backends.cuda.api.driver.check_status
-cupy_backends.cuda.api.driver.CUDADriverError: CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
-Traceback (most recent call last):
-  File "cupy_backends/cuda/api/driver.pyx", line 253, in cupy_backends.cuda.api.driver.moduleUnload
-  File "cupy_backends/cuda/api/driver.pyx", line 124, in cupy_backends.cuda.api.driver.check_status
-TypeError: 'NoneType' object is not callable
-Exception ignored in: 'cupy.cuda.function.Module.__dealloc__'
-Traceback (most recent call last):
-  File "cupy_backends/cuda/api/driver.pyx", line 253, in cupy_backends.cuda.api.driver.moduleUnload
-  File "cupy_backends/cuda/api/driver.pyx", line 124, in cupy_backends.cuda.api.driver.check_status
-TypeError: 'NoneType' object is not callable
-Traceback (most recent call last):
-  File "cupy_backends/cuda/api/driver.pyx", line 253, in cupy_backends.cuda.api.driver.moduleUnload
-  File "cupy_backends/cuda/api/driver.pyx", line 124, in cupy_backends.cuda.api.driver.check_status
-TypeError: 'NoneType' object is not callable
-Exception ignored in: 'cupy.cuda.function.Module.__dealloc__'
-Traceback (most recent call last):
-  File "cupy_backends/cuda/api/driver.pyx", line 253, in cupy_backends.cuda.api.driver.moduleUnload
-  File "cupy_backends/cuda/api/driver.pyx", line 124, in cupy_backends.cuda.api.driver.check_status
-TypeError: 'NoneType' object is not callable
-Traceback (most recent call last):
-  File "cupy_backends/cuda/api/driver.pyx", line 253, in cupy_backends.cuda.api.driver.moduleUnload
-  File "cupy_backends/cuda/api/driver.pyx", line 124, in cupy_backends.cuda.api.driver.check_status
-TypeError: 'NoneType' object is not callable
-Exception ignored in: 'cupy.cuda.function.Module.__dealloc__'
-Traceback (most recent call last):
-  File "cupy_backends/cuda/api/driver.pyx", line 253, in cupy_backends.cuda.api.driver.moduleUnload
-  File "cupy_backends/cuda/api/driver.pyx", line 124, in cupy_backends.cuda.api.driver.check_status
-TypeError: 'NoneType' object is not callable
-Traceback (most recent call last):
-  File "cupy_backends/cuda/api/driver.pyx", line 253, in cupy_backends.cuda.api.driver.moduleUnload
-  File "cupy_backends/cuda/api/driver.pyx", line 124, in cupy_backends.cuda.api.driver.check_status
-TypeError: 'NoneType' object is not callable
-Exception ignored in: 'cupy.cuda.function.Module.__dealloc__'
-Traceback (most recent call last):
-  File "cupy_backends/cuda/api/driver.pyx", line 253, in cupy_backends.cuda.api.driver.moduleUnload
-  File "cupy_backends/cuda/api/driver.pyx", line 124, in cupy_backends.cuda.api.driver.check_status
-TypeError: 'NoneType' object is not callable
-Error in sys.excepthook:
-
-Original exception was:
-Error in sys.excepthook:
-
-Original exception was:
-Error in sys.excepthook:
-
-Original exception was:
-Error in sys.excepthook:
-
-Original exception was:
+  File "lddmm.py", line 239, in <module>
+    v, Phi0, Phi1, J0, J1=LDDMM(i0, i1, T = 20, maxiter = 10, sigma = 0.1, alpha = 1, gamma = 1, lr = 0.001)
+  File "lddmm.py", line 196, in LDDMM
+    dJ0 = _image_grad(J0)
+  File "lddmm.py", line 145, in _image_grad
+    dJ0 = cp.empty((T, 3, nx, ny, nz), dtype = cp.float64)
+  File "/usr/local/lib/python3.7/dist-packages/cupy/_creation/basic.py", line 22, in empty
+    return cupy.ndarray(shape, dtype, order=order)
+  File "cupy/core/core.pyx", line 138, in cupy.core.core.ndarray.__init__
+  File "cupy/cuda/memory.pyx", line 578, in cupy.cuda.memory.alloc
+  File "cupy/cuda/memory.pyx", line 1250, in cupy.cuda.memory.MemoryPool.malloc
+  File "cupy/cuda/memory.pyx", line 1271, in cupy.cuda.memory.MemoryPool.malloc
+  File "cupy/cuda/memory.pyx", line 939, in cupy.cuda.memory.SingleDeviceMemoryPool.malloc
+  File "cupy/cuda/memory.pyx", line 959, in cupy.cuda.memory.SingleDeviceMemoryPool._malloc
+  File "cupy/cuda/memory.pyx", line 1210, in cupy.cuda.memory.SingleDeviceMemoryPool._try_malloc
+cupy.cuda.memory.OutOfMemoryError: Out of memory allocating 6,635,520,000 bytes (allocated so far: 32,573,952,512 bytes).

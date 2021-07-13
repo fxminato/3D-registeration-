@@ -1,48 +1,46 @@
 #ifndef WRAP_CU
 #define WRAP_CU
-extern "C" __global__ void wrap(double* y,const double* x,
-                                     const double* f1,
-                                     const double* f2,
-                                     const double* f3,
-                                     const long n)
+
+__device__ __forceinline__ bool is_legal(long i, long j, long k, long n) {
+    return 0 <= i && i < n && 0 <= j && j < n && 0 <= k && k < n;
+}
+
+__device__ __forceinline__ long logic_to_physical(long i, long j, long k, long n) {
+    return (i * n + j) * n + k;
+}
+
+extern "C" __global__ void wrap(double* y,
+                                const double* x,
+                                const double* f1,
+                                const double* f2,
+                                const double* f3,
+                                const long n)
 {
     long tid = blockDim.x * blockIdx.x + threadIdx.x;
-    if(tid< n * n * n )
-    {   y[tid] = 0;
-        double f11;
-        double f22;
-        double f33;
-        f11 = f1[tid];
-        f22 = f2[tid];
-        f33 = f3[tid];
-        f11 = (f11 > 0) ? f11 : 0;
-        f11 = (f11 < n - 1) ? f11 : (n - 1);
-        f22 = (f22 > 0) ? f22 : 0;
-        f22 = (f22 < n - 1) ? f22 : (n - 1);
-        f33 = (f33 > 0) ? f33 : 0;
-        f33 = (f33 < n - 1) ? f33 : (n - 1);
-        long fx1 = floor(f11);
-        long fy1 = floor(f22);
-        long fz1 = floor(f33);
-        long fx2 = ceil(f11);
-        long fy2 = ceil(f22);
-        long fz2 = ceil(f33);
-        double dx1 = f11 - fx1;
-        double dx2 = 1 - dx1;
-        double dy1 = f22 - fy1;
-        double dy2 = 1 - dy1;
-        double dz1 = f33 - fz1;
-        double dz2 = 1 - dz1;
-        y[tid] += (x[fx1 * n * n + fy1 * n + fz1] * dx2 * dy2 * dz2);
-        y[tid] += (x[fx1 * n * n + fy1 * n + fz2] * dx2 * dy2 * dz1);
-        y[tid] += (x[fx1 * n * n + fy2 * n + fz1] * dx2 * dy1 * dz2);
-        y[tid] += (x[fx1 * n * n + fy2 * n + fz2] * dx2 * dy1 * dz1);
-        y[tid] += (x[fx2 * n * n + fy1 * n + fz1] * dx1 * dy2 * dz2);
-        y[tid] += (x[fx2 * n * n + fy1 * n + fz2] * dx1 * dy2 * dz1);
-        y[tid] += (x[fx2 * n * n + fy2 * n + fz1] * dx1 * dy1 * dz2);
-        y[tid] += (x[fx2 * n * n + fy2 * n + fz2] * dx1 * dy1 * dz1);
-
-
+    if (tid < n * n * n) {
+        long i = f1[tid];
+        long j = f2[tid];
+        long k = f3[tid];
+        double di = f1[tid] - i;
+        double dj = f2[tid] - j;
+        double dk = f3[tid] - k;
+        y[tid] = 0;
+        if (is_legal(i    , j    , k    , n))
+            y[tid] += x[logic_to_physical(i    , j    , k    , n)] * (1 - di) * (1 - dj) * (1 - dk);
+        if (is_legal(i    , j    , k + 1, n))
+            y[tid] += x[logic_to_physical(i    , j    , k + 1, n)] * (1 - di) * (1 - dj) *      dk ;
+        if (is_legal(i    , j + 1, k    , n))
+            y[tid] += x[logic_to_physical(i    , j + 1, k    , n)] * (1 - di) *      dj  * (1 - dk);
+        if (is_legal(i    , j + 1, k + 1, n))
+            y[tid] += x[logic_to_physical(i    , j + 1, k + 1, n)] * (1 - di) *      dj  *      dk ;
+        if (is_legal(i + 1, j    , k    , n))
+            y[tid] += x[logic_to_physical(i + 1, j    , k    , n)] *      di  * (1 - dj) * (1 - dk);
+        if (is_legal(i + 1, j    , k + 1, n))
+            y[tid] += x[logic_to_physical(i + 1, j    , k + 1, n)] *      di  * (1 - dj) *      dk ;
+        if (is_legal(i + 1, j + 1, k    , n))
+            y[tid] += x[logic_to_physical(i + 1, j + 1, k    , n)] *      di  *      dj  * (1 - dk);
+        if (is_legal(i + 1, j + 1, k + 1, n))
+            y[tid] += x[logic_to_physical(i + 1, j + 1, k + 1, n)] *      di  *      dj  *      dk ;
     }
 }
 
